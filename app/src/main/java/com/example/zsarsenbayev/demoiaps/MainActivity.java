@@ -41,7 +41,7 @@ import com.affectiva.android.affdex.sdk.detector.Face;
 import java.io.File;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements Detector.ImageListener, CameraDetector.CameraEventListener{
+public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CAMERA_PERMISSION = 100;
     public final static int REQUEST_CODE = 200;
@@ -68,42 +68,51 @@ public class MainActivity extends AppCompatActivity implements Detector.ImageLis
 
         checkDrawOverlayPermission();
 
-        cameraPreview = new SurfaceView(this);
-
-        int LAYOUT_FLAG;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        } else {
-            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_PHONE;
-        }
-
-        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
-                1, 1,
-                LAYOUT_FLAG,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT
-        );
-
-
-        layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
-        windowManager.addView(cameraPreview, layoutParams);
-
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (isSDKStarted) {
-                    isSDKStarted = false;
-                    stopDetector();
-                    startButton.setText("Start Affectiva");
-                } else {
-                    isSDKStarted = true;
-                    startDetector();
-                    startButton.setText("Stop Affectiva");
-                }
+                startCamerService();
             }
         });
+
+        // start service here
+
+//        cameraPreview = new SurfaceView(this);
+//
+//        int LAYOUT_FLAG;
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+//        } else {
+//            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_PHONE;
+//        }
+//
+//        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+//        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
+//                1, 1,
+//                LAYOUT_FLAG,
+//                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+//                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+//                PixelFormat.TRANSLUCENT
+//        );
+//
+//
+//        layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
+//        windowManager.addView(cameraPreview, layoutParams);
+
+//        startButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (isSDKStarted) {
+//                    isSDKStarted = false;
+//                    stopDetector();
+//                    startButton.setText("Start Affectiva");
+//                } else {
+//                    isSDKStarted = true;
+//                    startDetector();
+//                    startButton.setText("Stop Affectiva");
+//                }
+//            }
+//        });
 
         checkPermissions();
         if (android.os.Build.VERSION.SDK_INT > 9)
@@ -112,12 +121,17 @@ public class MainActivity extends AppCompatActivity implements Detector.ImageLis
             StrictMode.setThreadPolicy(policy);
         }
 
-        detector = new CameraDetector(this, CameraDetector.CameraType.CAMERA_FRONT, cameraPreview);
-        detector.setDetectAllEmotions(true);
-        detector.setDetectSmile(true);
-        detector.setImageListener(this);
-        detector.setOnCameraEventListener(this);
+//        detector = new CameraDetector(this, CameraDetector.CameraType.CAMERA_FRONT, cameraPreview);
+//        detector.setDetectAllEmotions(true);
+//        detector.setDetectSmile(true);
+//        detector.setImageListener(this);
+//        detector.setOnCameraEventListener(this);
 
+    }
+
+    private void startCamerService() {
+        Intent serviceIntent = new Intent(this, CameraService.class);
+        startService(serviceIntent);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -129,63 +143,63 @@ public class MainActivity extends AppCompatActivity implements Detector.ImageLis
         }
     }
 
-    @Override
-    public void onCameraSizeSelected(int width, int height, Frame.ROTATE rotate) {
-        if (rotate == Frame.ROTATE.BY_90_CCW || rotate == Frame.ROTATE.BY_90_CW) {
-            previewWidth = height;
-            previewHeight = width;
-        } else {
-            previewHeight = height;
-            previewWidth = width;
-        }
-        cameraPreview.requestLayout();
-    }
+//    @Override
+//    public void onCameraSizeSelected(int width, int height, Frame.ROTATE rotate) {
+//        if (rotate == Frame.ROTATE.BY_90_CCW || rotate == Frame.ROTATE.BY_90_CW) {
+//            previewWidth = height;
+//            previewHeight = width;
+//        } else {
+//            previewHeight = height;
+//            previewWidth = width;
+//        }
+//        cameraPreview.requestLayout();
+//    }
 
-    @Override
-    public void onImageResults(List<Face> list, Frame frame, float v) {
-        if (list == null)
-            return;
-        if (list.size() == 0) {
-            Log.d(TAG, "No face detected");
-        } else {
-            final Face face = list.get(0);
-            Log.d(TAG, "contempt: " + face.emotions.getContempt());
-            Log.d(TAG, "disgust: " + face.emotions.getDisgust());
-            Log.d(TAG, "fear: " + face.emotions.getFear());
-            Log.d(TAG, "joy: " + face.emotions.getJoy());
-            Log.d(TAG, "sadness: " + face.emotions.getSadness());
-            Log.d(TAG, "surprise: " + face.emotions.getSurprise());
-            Log.d(TAG, "valence: " + face.emotions.getValence());
-            Log.d(TAG, "smile: " + face.expressions.getSmile());
+//    @Override
+//    public void onImageResults(List<Face> list, Frame frame, float v) {
+//        if (list == null)
+//            return;
+//        if (list.size() == 0) {
+//            Log.d(TAG, "No face detected");
+//        } else {
+//            final Face face = list.get(0);
+//            Log.d(TAG, "contempt: " + face.emotions.getContempt());
+//            Log.d(TAG, "disgust: " + face.emotions.getDisgust());
+//            Log.d(TAG, "fear: " + face.emotions.getFear());
+//            Log.d(TAG, "joy: " + face.emotions.getJoy());
+//            Log.d(TAG, "sadness: " + face.emotions.getSadness());
+//            Log.d(TAG, "surprise: " + face.emotions.getSurprise());
+//            Log.d(TAG, "valence: " + face.emotions.getValence());
+//            Log.d(TAG, "smile: " + face.expressions.getSmile());
+//
+//        }
+//    }
 
-        }
-    }
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        if (isSDKStarted) {
+//            startDetector();
+//        }
+//    }
+//
+//    @Override
+//    protected void onPause() {
+//        super.onPause();
+//        stopDetector();
+//    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (isSDKStarted) {
-            startDetector();
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        stopDetector();
-    }
-
-    void startDetector() {
-        if (!detector.isRunning()) {
-            detector.start();
-        }
-    }
-
-    void stopDetector() {
-        if (detector.isRunning()) {
-            detector.stop();
-        }
-    }
+//    void startDetector() {
+//        if (!detector.isRunning()) {
+//            detector.start();
+//        }
+//    }
+//
+//    void stopDetector() {
+//        if (detector.isRunning()) {
+//            detector.stop();
+//        }
+//    }
 
     public void checkDrawOverlayPermission() {
         /** check if we already  have permission to draw over other apps */
