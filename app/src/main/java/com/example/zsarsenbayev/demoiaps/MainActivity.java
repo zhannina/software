@@ -1,5 +1,14 @@
 package com.example.zsarsenbayev.demoiaps;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Camera;
+import android.graphics.PixelFormat;
+import android.hardware.camera2.CameraDevice;
+import android.media.MediaRecorder;
+import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.Manifest;
@@ -10,9 +19,12 @@ import android.os.StrictMode;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -25,29 +37,26 @@ import com.affectiva.android.affdex.sdk.detector.CameraDetector;
 import com.affectiva.android.affdex.sdk.detector.Detector;
 import com.affectiva.android.affdex.sdk.detector.Face;
 
+
+import java.io.File;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements Detector.ImageListener, CameraDetector.CameraEventListener{
 
     private static final int REQUEST_CAMERA_PERMISSION = 100;
+    public final static int REQUEST_CODE = 200;
     private static final String TAG = "LIVE_STREAM";
 
     private Button startButton;
-    private Button nextButton;
-    private String drawableName = "";
-    private ImageView imageView;
-    private TextView joyTextView;
-    private TextView sadTextView;
-    private TextView surpriseTextView;
-    private TextView disgustTextView;
 
     private SurfaceView cameraPreview;
-    private RelativeLayout mainLayout;
     private CameraDetector detector;
     private int previewWidth = 0;
     private int previewHeight = 0;
-    private int i = 1;
     private boolean isSDKStarted = false;
+    private WindowManager windowManager;
+
+
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -56,44 +65,30 @@ public class MainActivity extends AppCompatActivity implements Detector.ImageLis
         setContentView(R.layout.activity_main);
 
         startButton = (Button) findViewById(R.id.startButton);
-        nextButton = (Button) findViewById(R.id.nextButton);
-        mainLayout = (RelativeLayout) findViewById(R.id.mainActivityLayout);
-        imageView = (ImageView) findViewById(R.id.imageView);
-        joyTextView = (TextView) findViewById(R.id.joyTextView);
-        sadTextView = (TextView) findViewById(R.id.sadTextView);
-        surpriseTextView = (TextView) findViewById(R.id.surpriseTextView);
-        disgustTextView = (TextView) findViewById(R.id.disgustTextView);
 
-        cameraPreview = new SurfaceView(this) {
-            @Override
-            public void onMeasure(int widthSpec, int heightSpec) {
-                int measureWidth = MeasureSpec.getSize(widthSpec)/100;
-                int measureHeight = MeasureSpec.getSize(heightSpec)/100;
-                int width;
-                int height;
-                if (previewHeight == 0 || previewWidth == 0) {
-                    width = measureWidth;
-                    height = measureHeight;
-                } else {
-                    float viewAspectRatio = (float)measureWidth/measureHeight;
-                    float cameraPreviewAspectRatio = (float) previewWidth/previewHeight;
+        checkDrawOverlayPermission();
 
-                    if (cameraPreviewAspectRatio > viewAspectRatio) {
-                        width = measureWidth;
-                        height =(int) (measureWidth / cameraPreviewAspectRatio);
-                    } else {
-                        width = (int) (measureHeight * cameraPreviewAspectRatio);
-                        height = measureHeight;
-                    }
-                }
-                setMeasuredDimension(width,height);
-            }
-        };
+        cameraPreview = new SurfaceView(this);
 
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.addRule(RelativeLayout.CENTER_IN_PARENT,RelativeLayout.TRUE);
-        cameraPreview.setLayoutParams(params);
-        mainLayout.addView(cameraPreview,0);
+        int LAYOUT_FLAG;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_PHONE;
+        }
+
+        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
+                1, 1,
+                LAYOUT_FLAG,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+        );
+
+
+        layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
+        windowManager.addView(cameraPreview, layoutParams);
 
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,11 +96,11 @@ public class MainActivity extends AppCompatActivity implements Detector.ImageLis
                 if (isSDKStarted) {
                     isSDKStarted = false;
                     stopDetector();
-                    startButton.setText("Start Camera");
+                    startButton.setText("Start Affectiva");
                 } else {
                     isSDKStarted = true;
                     startDetector();
-                    startButton.setText("Stop Camera");
+                    startButton.setText("Stop Affectiva");
                 }
             }
         });
@@ -123,25 +118,6 @@ public class MainActivity extends AppCompatActivity implements Detector.ImageLis
         detector.setImageListener(this);
         detector.setOnCameraEventListener(this);
 
-        nextButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                nextButton.setText("Next");
-
-                drawableName = "img" + String.valueOf(i);
-                int resID = getResources().getIdentifier(drawableName, "drawable", getPackageName());
-                imageView.setImageResource(resID);
-                imageView.setTag(drawableName);
-                i++;
-                if (i > 10) {
-//                    Toast.makeText(getApplicationContext(), "DONE", Toast.LENGTH_SHORT).show();
-//                    nextButton.setEnabled(false);
-//                    drawableName = "noPictureDisplayed";
-                    i = 1;
-                }
-            }
-        });
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -173,11 +149,6 @@ public class MainActivity extends AppCompatActivity implements Detector.ImageLis
             Log.d(TAG, "No face detected");
         } else {
             final Face face = list.get(0);
-            joyTextView.setText(""+String.format("%.2f", face.emotions.getJoy()));
-            sadTextView.setText(""+String.format("%.2f", face.emotions.getSadness()));
-            surpriseTextView.setText("" + String.format("%.2f", face.emotions.getSurprise()));
-            disgustTextView.setText(""+String.format("%.2f", face.emotions.getDisgust()));
-            Log.d(TAG, "anger: " + face.emotions.getAnger());
             Log.d(TAG, "contempt: " + face.emotions.getContempt());
             Log.d(TAG, "disgust: " + face.emotions.getDisgust());
             Log.d(TAG, "fear: " + face.emotions.getFear());
@@ -215,4 +186,28 @@ public class MainActivity extends AppCompatActivity implements Detector.ImageLis
             detector.stop();
         }
     }
+
+    public void checkDrawOverlayPermission() {
+        /** check if we already  have permission to draw over other apps */
+        if (!Settings.canDrawOverlays(this)) {
+            /** if not construct intent to request permission */
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            /** request permission via start activity for result */
+            startActivityForResult(intent, REQUEST_CODE);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode,  Intent data) {
+        /** check if received result code
+         is equal our requested code for draw permission  */
+        if (requestCode == REQUEST_CODE) {
+       /** if so check once again if we have permission */
+            if (Settings.canDrawOverlays(this)) {
+                // continue here - permission was granted
+            }
+        }
+    }
+
 }
