@@ -1,6 +1,8 @@
 package com.example.zsarsenbayev.demoiaps;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,8 +20,11 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CAMERA_PERMISSION = 100;
     public final static int REQUEST_CODE = 200;
+    public static final String MyPREFS = "MyPrefs" ;
+    public String deviceID;
 
     private Button startButton;
+    private SharedPreferences sharedPrefs;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -30,6 +35,14 @@ public class MainActivity extends AppCompatActivity {
         startButton = findViewById(R.id.startButton);
 
         checkDrawOverlayPermission();
+
+        deviceID = Settings.Secure.getString(getApplicationContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID);
+
+        sharedPrefs = getSharedPreferences(MyPREFS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putString("deviceID", deviceID);
+        editor.commit();
 
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -21,14 +21,19 @@ public class ActivateAwareService extends Service {
     }
 
     @Override
-    public void onCreate(){
+    public void onCreate() {
         phoneUnlockReceiver = new PhoneUnlockReceiver();
-        Intent aware = new Intent(this, Aware.class);
+
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId){
+    Intent aware = new Intent(this, Aware.class);
         startService(aware);
 
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_SCREEN, true);
-
         Aware.startScreen(getApplicationContext());
+
         Applications.isAccessibilityServiceActive(getApplicationContext());// to start applications sensor
         Applications.setSensorObserver(new Applications.AWARESensorObserver() {
             @Override
@@ -69,6 +74,7 @@ public class ActivateAwareService extends Service {
         filter.addAction(Screen.ACTION_AWARE_SCREEN_UNLOCKED);
         registerReceiver(phoneUnlockReceiver, filter);
 
+        return START_STICKY;
     }
 
     // Stop recording and remove SurfaceView

@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Camera;
 import android.graphics.PixelFormat;
 import android.media.CamcorderProfile;
@@ -40,6 +41,10 @@ public class CameraService extends Service implements Detector.ImageListener, Ca
     private WindowManager windowManager;
 
     private static final String TAG = "Zhanna";
+    public static final String MyPREFS = "MyPrefs" ;
+
+    private String deviceID;
+    private SharedPreferences sharedPrefs;
 
 
     public CameraService() {
@@ -49,6 +54,9 @@ public class CameraService extends Service implements Detector.ImageListener, Ca
     public void onCreate() {
 
         cameraPreview = new SurfaceView(this);
+
+        sharedPrefs = getSharedPreferences(MyPREFS, Context.MODE_PRIVATE);
+        deviceID = sharedPrefs.getString("deviceID", "default");
 
         int LAYOUT_FLAG;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -123,6 +131,20 @@ public class CameraService extends Service implements Detector.ImageListener, Ca
             Log.d(TAG, "surprise: " + face.emotions.getSurprise());
             Log.d(TAG, "valence: " + face.emotions.getValence());
             Log.d(TAG, "smile: " + face.expressions.getSmile());
+
+            ContentValues rowData = new ContentValues();
+            rowData.put(EmotionsProvider.EmotionsTable.TIMESTAMP, System.currentTimeMillis());
+            rowData.put(EmotionsProvider.EmotionsTable.DEVICE_ID, deviceID);
+            rowData.put(EmotionsProvider.EmotionsTable.ANGER, face.emotions.getAnger());
+            rowData.put(EmotionsProvider.EmotionsTable.CONTEMPT, face.emotions.getContempt());
+            rowData.put(EmotionsProvider.EmotionsTable.DISGUST, face.emotions.getDisgust());
+            rowData.put(EmotionsProvider.EmotionsTable.FEAR, face.emotions.getFear());
+            rowData.put(EmotionsProvider.EmotionsTable.JOY, face.emotions.getJoy());
+            rowData.put(EmotionsProvider.EmotionsTable.SADNESS, face.emotions.getSadness());
+            rowData.put(EmotionsProvider.EmotionsTable.SURPRISE, face.emotions.getSurprise());
+            rowData.put(EmotionsProvider.EmotionsTable.VALENCE, face.emotions.getValence());
+            rowData.put(EmotionsProvider.EmotionsTable.SMILE, face.expressions.getSmile());
+            getApplicationContext().getContentResolver().insert(EmotionsProvider.EmotionsTable.CONTENT_URI, rowData);
 
         }
     }

@@ -48,6 +48,12 @@
             </intent-filter>
         </activity>
 
+        <provider
+            android:name=".EmotionsProvider"
+            android:authorities="com.example.zsarsenbayev.demoiaps.emotions"
+            android:enabled="true"
+            android:exported="true" />
+
         <service
             android:name="com.aware.Applications"
             android:enabled="true"
