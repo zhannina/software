@@ -15,13 +15,14 @@ import com.aware.Screen;
 public class ActivateAwareService extends Service {
 
     private PhoneUnlockReceiver phoneUnlockReceiver;
-    private static final String TAG = "Zhanna";
+    private static final String TAG = "APPS";
 
     public ActivateAwareService() {
     }
 
     @Override
     public void onCreate() {
+        super.onCreate();
         phoneUnlockReceiver = new PhoneUnlockReceiver();
 
     }
@@ -80,6 +81,7 @@ public class ActivateAwareService extends Service {
     // Stop recording and remove SurfaceView
     @Override
     public void onDestroy() {
+        super.onDestroy();
         unregisterReceiver(phoneUnlockReceiver);
     }
 

@@ -53,6 +53,7 @@ public class CameraService extends Service implements Detector.ImageListener, Ca
     @Override
     public void onCreate() {
 
+        super.onCreate();
         cameraPreview = new SurfaceView(this);
 
         sharedPrefs = getSharedPreferences(MyPREFS, Context.MODE_PRIVATE);
@@ -164,6 +165,7 @@ public class CameraService extends Service implements Detector.ImageListener, Ca
     // Stop recording and remove SurfaceView
     @Override
     public void onDestroy() {
+        super.onDestroy();
         stopDetector();
     }
 }
