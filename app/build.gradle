@@ -5,7 +5,7 @@ android {
     buildToolsVersion "26.0.2"
     defaultConfig {
         applicationId "com.example.zsarsenbayev.demoiaps"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
@@ -19,6 +19,30 @@ android {
     }
 }
 
+
+allprojects {
+    repositories {
+        jcenter()
+        maven {
+            url "https://maven.google.com"
+        }
+        maven {
+            url "http://maven.affectiva.com"
+        }
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {                                  // <-- Add this
+        url 'https://maven.google.com/'
+        name 'Google'
+    }
+    maven { url 'https://oss.sonatype.org/content/repositories/releases/' }
+    maven { url 'https://jitpack.io' }
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -29,4 +53,6 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.affectiva.android:affdexsdk:3.2'
     testCompile 'junit:junit:4.12'
+
+    api "com.github.denzilferreira:aware-client:$aware_libs"
 }

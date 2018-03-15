@@ -2,8 +2,10 @@ package com.example.zsarsenbayev.demoiaps;
 
 import android.app.Notification;
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Camera;
 import android.graphics.PixelFormat;
 import android.media.CamcorderProfile;
@@ -25,6 +27,7 @@ import com.affectiva.android.affdex.sdk.detector.CameraDetector;
 import com.affectiva.android.affdex.sdk.detector.Detector;
 import com.affectiva.android.affdex.sdk.detector.Face;
 
+
 import java.util.List;
 
 public class CameraService extends Service implements Detector.ImageListener, CameraDetector.CameraEventListener{
@@ -35,7 +38,9 @@ public class CameraService extends Service implements Detector.ImageListener, Ca
     private int previewHeight = 0;
     private boolean isSDKStarted = false;
     private WindowManager windowManager;
-    private static final String TAG = "LIVE_STREAM";
+
+    private static final String TAG = "Zhanna";
+
 
     public CameraService() {
     }
@@ -44,6 +49,7 @@ public class CameraService extends Service implements Detector.ImageListener, Ca
     public void onCreate() {
 
         cameraPreview = new SurfaceView(this);
+
         int LAYOUT_FLAG;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -74,6 +80,7 @@ public class CameraService extends Service implements Detector.ImageListener, Ca
         detector.setImageListener(this);
         detector.setOnCameraEventListener(this);
 
+
     }
 
     public int onStartCommand(Intent intent, int flags, int startId){
@@ -81,18 +88,11 @@ public class CameraService extends Service implements Detector.ImageListener, Ca
         return START_STICKY;
     }
 
-    // Stop recording and remove SurfaceView
-    @Override
-    public void onDestroy() {
-        stopDetector();
-    }
-
     @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
     }
-
 
 
     @Override
@@ -137,5 +137,11 @@ public class CameraService extends Service implements Detector.ImageListener, Ca
         if (detector.isRunning()) {
             detector.stop();
         }
+    }
+
+    // Stop recording and remove SurfaceView
+    @Override
+    public void onDestroy() {
+        stopDetector();
     }
 }
