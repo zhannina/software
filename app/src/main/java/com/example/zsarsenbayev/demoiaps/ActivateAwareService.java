@@ -29,7 +29,7 @@ public class ActivateAwareService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
-    Intent aware = new Intent(this, Aware.class);
+        Intent aware = new Intent(this, Aware.class);
         startService(aware);
 
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_SCREEN, true);
